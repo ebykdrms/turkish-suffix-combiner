@@ -20,10 +20,15 @@ echo $combiner->kelime('Su',false)->halEki('i')->get(); echo '<br />';
 echo $combiner->kelime('Su',false)->halEki('de')->get(); echo '<br />';
 echo $combiner->kelime('Su',false)->halEki('den')->get(); echo '<hr />';
 echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->dahi()->get(); echo '<br />';
-echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->aitlikEki('in')->dahi()->get(); echo '<hr />';
-echo $combiner->kelime('Tuzluk')->m_aitlik()->de_hal()->ki()->ler_cogul()->den_hal()->dahi()->get(); echo '<br />';
+echo $combiner->kelime('Tuzluk',false,true)->aitlikEki('m')->halEki('da')->ki()->aitlikEki('in')->dahi()->get(); echo '<hr />';
+echo $combiner->kelime('Tuzluk',false,true)->m_aitlik()->de_hal()->ki()->ler_cogul()->den_hal()->dahi()->get(); echo '<hr />';
 
-/*
+/*    
+    kelime() fonksiyonu kök kelimeyi belirttiğiniz fonksiyondur. Üç parametre alır:
+    1) Kök kelime
+    2) Kök kelimenin özel ad olup olmadığı (tırnak işareti oluşturmada etkilidir)
+    3) (isteğe bağlı) Kök kelimeye gelecek eklerin büyük harf olup olmaması. true girilirse tüm ekler büyük harf olur.
+
     halEki() fonksiyonu yalnızca şu değerleri alabilir:
     > ismin -e hali için....: e, a (koda)
     > ismin -i hali için....: i, ı, ü, u (kodu)
@@ -50,6 +55,9 @@ echo $combiner->kelime('Tuzluk')->m_aitlik()->de_hal()->ki()->ler_cogul()->den_h
       echo $combiner->kelime('kod')->aitlikEki('m')->halEki('de')->ki()->aitlikEki('in')->dahi()->get(); // kodumdakinin de
     > echo $combiner->kelime('kod')->m_aitlik()->de_hal()->ki()->in_aitlik()->dahi()->get(); // kodumdakinin de
     
+    Eklerin büyük harf olarak oluşmasını istiyorsanız iki yol var:
+    > Büyük harf olmasını istediğiniz ekin fonkisyonuna son parametre olarak true ekleyin.
+    > Tüm eklerin mutlaka büyük olmasını istiyorsanız kelime() fonksiyonuna 3.parametre olarak true ekleyin.
 */
 
 class TurkishSuffixCombiner
@@ -57,19 +65,23 @@ class TurkishSuffixCombiner
     private $k,$kArr,$kArrCount,$kSonSesli;
     private $ek,$ekArr,$ekIndex;
     private $ozelAd;
+    private $tumEklerBuyuk = false;
 
     private $birlesim;
 
-    private $sessiz = array('b','c','ç','d','f','g','ğ','h','j','k','l','m','n','p','r','s','ş','t','v','y','z','w','x','q');
-    private $sesli = array('a','ı','o','u','e','i','ö','ü');
-    private $kalinSesli = array('a','ı','o','u');
-    private $inceSesli = array('e','i','ö','ü');
-    private $yuvarlakSesli = array('o','ö','u','ü');
-    private $kalinYuvarlakSesli = array('o','u');
-    private $inceYuvarlakSesli = array('ö','ü');
-    private $duzSesli = array('a','e','ı','i');    
-    private $kalinDuzSesli = array('a','ı');
-    private $inceDuzSesli = array('e','i');
+    private $sessiz = array(
+        'b','c','ç','d','f','g','ğ','h','j','k','l','m','n','p','r','s','ş','t','v','y','z','w','x','q',
+        'B','C','Ç','D','F','G','Ğ','H','J','K','L','M','N','P','R','S','Ş','T','V','Y','Z','W','X','Q'
+    );
+    private $sesli = array('a','ı','o','u','e','i','ö','ü','A','I','O','U','E','İ','Ö','Ü');
+    private $kalinSesli = array('a','ı','o','u','A','I','O','U');
+    private $inceSesli = array('e','i','ö','ü','E','İ','Ö','Ü');
+    private $yuvarlakSesli = array('o','ö','u','ü','O','Ö','U','Ü');
+    private $kalinYuvarlakSesli = array('o','u','O','U');
+    private $inceYuvarlakSesli = array('ö','ü','Ö','Ü');
+    private $duzSesli = array('a','e','ı','i','A','E','I','İ');    
+    private $kalinDuzSesli = array('a','ı','A','I');
+    private $inceDuzSesli = array('e','i','E','İ');
 
     public function __construct($kelime='',$ozelAd=false)
     {
@@ -78,10 +90,11 @@ class TurkishSuffixCombiner
 
     public function get() { return $this->birlesim; }    
 
-    public function kelime($kelime,$ozelAd=false)
-    {
+    public function kelime($kelime,$ozelAd=false,$tumEklerBuyuk=false)
+    {        
+        if($tumEklerBuyuk) $this->tumEklerBuyuk = true;
         $this->k = $kelime;
-        $this->kArr = str_split($kelime);
+        $this->kArr = preg_split('//u', $kelime, -1, PREG_SPLIT_NO_EMPTY);
         $this->kArrCount = count($this->kArr);
         $this->ozelAd = $ozelAd;
 
@@ -89,7 +102,7 @@ class TurkishSuffixCombiner
         $this->kSonSesli = '';
         for($i=$this->kArrCount-1; $i>=0; $i--) {
             if(in_array($this->kArr[$i],$this->sesli)) { 
-                $this->kSonSesli = $this->kArr[$i]; 
+                $this->kSonSesli = $this->kArr[$i];
                 break; 
             }
         }
@@ -106,8 +119,9 @@ class TurkishSuffixCombiner
     private $halEki_de = array('de','da','te','ta');
     private $halEki_den = array('den','dan','ten','tan');
 
-    public function halEki($ek)
-    {        
+    public function halEki($ek,$buyuk=false)
+    {
+        $ek = mb_strtolower($ek,'UTF-8');
         if(in_array($ek,$this->halEki_e)) {
             $this->set_kSonSessiziYumusat();
             $ek = $this->halEki_e[$this->ekIndex];
@@ -120,29 +134,18 @@ class TurkishSuffixCombiner
             if($this->is_kSonHarfSesli()) $ek = 'y'.$ek;
         }
         elseif(in_array($ek,$this->halEki_de)) {
-            if(in_array(end($this->kArr),$this->sertlestirenSessiz)) $ek = $this->halEki_de[$this->ekIndex+2];
+            if($this->is_kSonHarfSertlestirenSessiz()) $ek = $this->halEki_de[$this->ekIndex+2];
             else $ek = $this->halEki_de[$this->ekIndex];
         }
         elseif(in_array($ek,$this->halEki_den)) {
-            if(in_array(end($this->kArr),$this->sertlestirenSessiz)) $ek = $this->halEki_den[$this->ekIndex+2];
+            if($this->is_kSonHarfSertlestirenSessiz()) $ek = $this->halEki_den[$this->ekIndex+2];
             else $ek = $this->halEki_den[$this->ekIndex];
         }
-
+        if($buyuk || $this->tumEklerBuyuk) $ek = $this->set_buyuk($ek);
         $this->set_birlesim($ek);
 
         return $this;
     }    
-
-    // ÇOĞUL EKİ: ler
-    private $cogulEki_ler = array('ler','lar');
-
-    public function cogulEki()
-    {
-        $ek = 'ler';
-        if(in_array($ek,$this->cogulEki_ler)) $ek = $this->cogulEki_ler[$this->ekIndex];
-        $this->set_birlesim($ek);
-        return $this;
-    }
 
     // AİTLİK EKİ: m, n, i, miz, niz, leri
     private $aitlikEki_m = array('m','m','im','ım','üm','um');
@@ -152,8 +155,9 @@ class TurkishSuffixCombiner
     private $aitlikEki_niz = array('niz','nız','nüz','nuz','iniz','ınız','ünüz','unuz');
     private $aitlikEki_leri = array('leri','ları');
 
-    public function aitlikEki($ek)
+    public function aitlikEki($ek,$buyuk=false)
     {
+        $ek = mb_strtolower($ek,'UTF-8');
         $this->set_kSonSessiziYumusat();
         if(in_array($ek,$this->aitlikEki_m)) {            
             if($ek=='m') {
@@ -202,7 +206,7 @@ class TurkishSuffixCombiner
             }
         }
         elseif(in_array($ek,$this->aitlikEki_miz)) {
-            $ekIlkHarf = str_split($ek)[0];             
+            $ekIlkHarf = preg_split('//u', $ek, -1, PREG_SPLIT_NO_EMPTY);[0];             
             if(in_array($ekIlkHarf,$this->sesli)) {
                 if($this->is_kSonHarfSesli()) {
                     if($this->is_kSonSesliHarfYuvarlak()) $ek = $this->aitlikEki_miz[$this->ekIndex+2];
@@ -225,7 +229,7 @@ class TurkishSuffixCombiner
             }
         }
         elseif(in_array($ek,$this->aitlikEki_niz)) {
-            $ekIlkHarf = str_split($ek)[0];             
+            $ekIlkHarf = preg_split('//u', $ek, -1, PREG_SPLIT_NO_EMPTY)[0];             
             if(in_array($ekIlkHarf,$this->sesli)) {
                 if($this->is_kSonHarfSesli()) {
                     if($this->is_kSonSesliHarfYuvarlak()) $ek = $this->aitlikEki_niz[$this->ekIndex+2];
@@ -250,43 +254,59 @@ class TurkishSuffixCombiner
         elseif(in_array($ek,$this->aitlikEki_leri)) {
             $ek = $this->aitlikEki_leri[$this->ekIndex];
         }
+        if($buyuk || $this->tumEklerBuyuk) $ek = $this->set_buyuk($ek);
+        $this->set_birlesim($ek);
+        return $this;
+    }
 
+    // ÇOĞUL EKİ: ler
+    private $cogulEki_ler = array('ler','lar');
+
+    public function cogulEki($buyuk=false)
+    {
+        $ek = 'ler';        
+        if(in_array($ek,$this->cogulEki_ler)) $ek = $this->cogulEki_ler[$this->ekIndex];
+        if($buyuk || $this->tumEklerBuyuk) $ek = $this->set_buyuk($ek);
         $this->set_birlesim($ek);
         return $this;
     }
 
     // -ki EKİ
-    public function ki()
+    public function ki($buyuk=false)
     {
-        $this->set_birlesim('ki');
+        $ek = 'ki';
+        if($buyuk || $this->tumEklerBuyuk) $ek = $this->set_buyuk($ek);
+        $this->set_birlesim($ek);
         return $this;
     }
 
     // DAHİ ANLAMINDAKİ -de EKİ
-    public function dahi()
+    public function dahi($buyuk=false)
     {        
         $this->k = rtrim($this->k).' ';
         $this->kArr = str_split($this->k);
         $this->kArrCount = count($this->kArr);
-        $this->set_birlesim(array('de','da')[$this->ekIndex]);
+        $ek = array('de','da')[$this->ekIndex];
+        if($buyuk || $this->tumEklerBuyuk) $ek = $this->set_buyuk($ek);
+        $this->set_birlesim($ek);
         return $this;
     }
 
     // KULLANIM KOLAYLAŞTIRICI FONKSİYONLAR
-    public function e_hal() { $this->halEki('e'); return $this; }
-    public function i_hal() { $this->halEki('i'); return $this; }
-    public function de_hal() { $this->halEki('de'); return $this; }
-    public function den_hal() { $this->halEki('den'); return $this; }
-    public function ler_cogul() { $this->cogulEki(); return $this; }
-    public function m_aitlik() { $this->aitlikEki('m'); return $this; }
-    public function n_aitlik() { $this->aitlikEki('n'); return $this; }
-    public function im_aitlik() { $this->aitlikEki('im'); return $this; }
-    public function in_aitlik() { $this->aitlikEki('in'); return $this; }
-    public function miz_aitlik() { $this->aitlikEki('miz'); return $this; }
-    public function niz_aitlik() { $this->aitlikEki('niz'); return $this; }
-    public function imiz_aitlik() { $this->aitlikEki('miz'); return $this; }
-    public function iniz_aitlik() { $this->aitlikEki('niz'); return $this; }
-    public function leri_aitlik() { $this->aitlikEki('leri'); return $this; }
+    public function e_hal($buyuk=false) { $this->halEki('e',$buyuk); return $this; }
+    public function i_hal($buyuk=false) { $this->halEki('i',$buyuk); return $this; }
+    public function de_hal($buyuk=false) { $this->halEki('de',$buyuk); return $this; }
+    public function den_hal($buyuk=false) { $this->halEki('den',$buyuk); return $this; }
+    public function ler_cogul($buyuk=false) { $this->cogulEki($buyuk); return $this; }
+    public function m_aitlik($buyuk=false) { $this->aitlikEki('m',$buyuk); return $this; }
+    public function n_aitlik($buyuk=false) { $this->aitlikEki('n',$buyuk); return $this; }
+    public function im_aitlik($buyuk=false) { $this->aitlikEki('im',$buyuk); return $this; }
+    public function in_aitlik($buyuk=false) { $this->aitlikEki('in',$buyuk); return $this; }
+    public function miz_aitlik($buyuk=false) { $this->aitlikEki('miz',$buyuk); return $this; }
+    public function niz_aitlik($buyuk=false) { $this->aitlikEki('niz',$buyuk); return $this; }
+    public function imiz_aitlik($buyuk=false) { $this->aitlikEki('miz',$buyuk); return $this; }
+    public function iniz_aitlik($buyuk=false) { $this->aitlikEki('niz',$buyuk); return $this; }
+    public function leri_aitlik($buyuk=false) { $this->aitlikEki('leri',$buyuk); return $this; }
 
 
     private function set_birlesim($ek='')
@@ -298,11 +318,19 @@ class TurkishSuffixCombiner
         $this->kelime($this->birlesim,false);
     }
 
+    private function set_buyuk($str)
+    {
+        $str = str_replace('i','İ',$str);
+        $str = str_replace('ö','Ö',$str);
+        $str = str_replace('ü','Ü',$str);
+        return mb_strtoupper($str,'utf-8');
+    }
+
 
     // ÜNSÜZ BENZEŞMESİ İŞLEMLERİ
-    private $sertlestirenSessiz = array('f','s','t','k','ç','ş','h','p');
-    private $sertlesecekSessiz = array('c','d','ğ');
-    private $sertlesmisSessiz = array('ç','t','k');
+    private $sertlestirenSessiz = array('f','s','t','k','ç','ş','h','p','F','S','T','K','Ç','Ş','H','P');
+    private $sertlesecekSessiz = array('c','d','ğ','C','D','Ğ');
+    private $sertlesmisSessiz = array('ç','t','k','Ç','T','K');
     private function set_kSonSessiziYumusat()
     {
         if($this->ozelAd===false && $this->is_kSonHarfSertlesmisSessiz()) {            
@@ -325,10 +353,10 @@ class TurkishSuffixCombiner
     private function is_kSonHarfSertlestirenSessiz() { return in_array(end($this->kArr),$this->sertlestirenSessiz); }
     private function is_kSonHarfSertlesecekSessiz() { return in_array(end($this->kArr),$this->sertlesecekSessiz); }
     private function is_kSonHarfSertlesmisSessiz() { return in_array(end($this->kArr),$this->sertlesmisSessiz); }
-    private function is_kSonSesliHarfYuvarlak() { return in_array($this->kSonSesli,array('ö','o','ü','u')); }
-    private function is_kSonSesliHarfDuz() { return in_array($this->kSonSesli,array('e','a','i','ı')); }
-    private function is_kSonSesliHarfKalinYuvarlak() { return in_array($this->kSonSesli,array('o','u')); }
-    private function is_kSonSesliHarfInceYuvarlak() { return in_array($this->kSonSesli,array('ö','ü')); }
-    private function is_kSonSesliHarfKalinDuz() { return in_array($this->kSonSesli,array('a','ı')); }
-    private function is_kSonSesliHarfInceDuz() { return in_array($this->kSonSesli,array('e','i')); }
+    private function is_kSonSesliHarfYuvarlak() { return in_array($this->kSonSesli,$this->yuvarlakSesli); }
+    private function is_kSonSesliHarfDuz() { return in_array($this->kSonSesli,$this->duzSesli); }
+    private function is_kSonSesliHarfKalinYuvarlak() { return in_array($this->kSonSesli,$this->kalinYuvarlakSesli); }
+    private function is_kSonSesliHarfInceYuvarlak() { return in_array($this->kSonSesli,$this->inceYuvarlakSesli); }
+    private function is_kSonSesliHarfKalinDuz() { return in_array($this->kSonSesli,$this->kalinDuzSesli); }
+    private function is_kSonSesliHarfInceDuz() { return in_array($this->kSonSesli,$this->inceDuzSesli); }
 }
