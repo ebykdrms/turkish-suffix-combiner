@@ -11,6 +11,30 @@ echo $combiner->kelime('Sedat',true)->aitlikEki('nız')->get(); echo '<br />';
 echo $combiner->kelime('Ümmiye',true)->aitlikEki('nız')->get(); echo '<br />';
 echo $combiner->kelime('Büşra',true)->aitlikEki('nız')->get(); echo '<br />';
 echo $combiner->kelime('Tuzluk',false)->aitlikEki('nız')->get(); echo '<hr />';
+echo $combiner->kelime('Tuzluk',false)->halEki('e')->get(); echo '<br />';
+echo $combiner->kelime('Tuzluk',false)->halEki('i')->get(); echo '<br />';
+echo $combiner->kelime('Tuzluk',false)->halEki('de')->get(); echo '<br />';
+echo $combiner->kelime('Tuzluk',false)->halEki('den')->get(); echo '<br />';
+echo $combiner->kelime('Su',false)->halEki('e')->get(); echo '<br />';
+echo $combiner->kelime('Su',false)->halEki('i')->get(); echo '<br />';
+echo $combiner->kelime('Su',false)->halEki('de')->get(); echo '<br />';
+echo $combiner->kelime('Su',false)->halEki('den')->get(); echo '<br />';
+
+/*
+    halEki() fonksiyonu yalnızca şu değerleri alabilir:
+    > ismin -e hali için....: e, a (koda)
+    > ismin -i hali için....: i, ı, ü, u (kodu)
+    > ismin -de hali için...: de, da (koda)
+    > ismin -den hali için..: den, dan (koddan)
+
+    aitlikEki() fonksiyonu yalnızca şu değerleri alabilir:
+    > benim anlamı için.....: m, im, ım, üm, um (kodum)
+    > senin anlamı için.....: n, in, ın, un, ün (kodun)
+    > onun anlamı için......: i, ı, ü, u (kodu)
+    > bizim anlamı için.....: miz, mız, müz, muz, imiz, ımız, ümüz, umuz (kodumuz)
+    > sizin anlamı için.....: niz, nız, nüz, nuz, iniz, ınız, ünüz, unuz (kodunuz)
+    > onların anlamı için...: leri, ları (kodları)
+*/
 
 class TurkishSuffixCombiner
 {
@@ -20,6 +44,7 @@ class TurkishSuffixCombiner
 
     private $birlesim;
 
+    private $sessiz = array('b','c','ç','d','f','g','ğ','h','j','k','l','m','n','p','r','s','ş','t','v','y','z','w','x','q');
     private $sesli = array('a','ı','o','u','e','i','ö','ü');
     private $kalinSesli = array('a','ı','o','u');
     private $inceSesli = array('e','i','ö','ü');
@@ -29,11 +54,6 @@ class TurkishSuffixCombiner
     private $duzSesli = array('a','e','ı','i');    
     private $kalinDuzSesli = array('a','ı');
     private $inceDuzSesli = array('e','i');
-
-    private $sessiz = array('b','c','ç','d','f','g','ğ','h','j','k','l','m','n','p','r','s','ş','t','v','y','z','w','x','q');
-    
-
-    
 
     public function __construct($kelime='',$ozelAd=false)
     {
@@ -73,12 +93,15 @@ class TurkishSuffixCombiner
     public function halEki($ek)
     {        
         if(in_array($ek,$this->halEki_e)) {
+            $this->set_kSonSessiziYumusat();
             $ek = $this->halEki_e[$this->ekIndex];
             if(in_array(end($this->kArr),$this->sesli)) $ek = 'y'.$ek;
         }
         elseif(in_array($ek,$this->halEki_i)) {
-            $ek = $this->halEki_i[$this->ekIndex];
-            if(in_array(end($this->kArr),$this->sesli)) $ek = 'y'.$ek;
+            $this->set_kSonSessiziYumusat();
+            if($this->is_kSonSesliHarfYuvarlak()) $ek = $this->halEki_i[$this->ekIndex+2];
+            else $ek = $this->halEki_i[$this->ekIndex];
+            if($this->is_kSonHarfSesli()) $ek = 'y'.$ek;
         }
         elseif(in_array($ek,$this->halEki_de)) {
             if(in_array(end($this->kArr),$this->sertlestirenSessiz)) $ek = $this->halEki_de[$this->ekIndex+2];
