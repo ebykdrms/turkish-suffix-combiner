@@ -20,7 +20,8 @@ echo $combiner->kelime('Su',false)->halEki('i')->get(); echo '<br />';
 echo $combiner->kelime('Su',false)->halEki('de')->get(); echo '<br />';
 echo $combiner->kelime('Su',false)->halEki('den')->get(); echo '<hr />';
 echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->dahi()->get(); echo '<br />';
-echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->aitlikEki('in')->dahi()->get(); echo '<br />';
+echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->aitlikEki('in')->dahi()->get(); echo '<hr />';
+echo $combiner->kelime('Tuzluk')->m_aitlik()->de_hal()->ki()->ler_cogul()->den_hal()->dahi()->get(); echo '<br />';
 
 /*
     halEki() fonksiyonu yalnızca şu değerleri alabilir:
@@ -37,6 +38,8 @@ echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->aitlikEki(
     > sizin anlamı için.....: niz, nız, nüz, nuz, iniz, ınız, ünüz, unuz (kodunuz)
     > onların anlamı için...: leri, ları (kodları)
 
+    cogulEki() fonksiyonu parametre almaz. Kelimele çoğul anlamı katan -ler ekini ekler.
+
     ki() fonksiyonu parametre almaz. Kelimeye bitişik -ki eki ekler.
 
     dahi() fonksiyonu parametre almaz. Kelimeye dahi anlamındaki -de ekini (ayrı olarak) ekler.
@@ -44,7 +47,9 @@ echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->aitlikEki(
     Fonksiyonlar zincir şeklinde kullanılabilir. Sıralama önemlidir: Ekler, zincirdeki sırasına göre eklenir.
     Sonuç almak için get() fonksiyonu kullanılır.
     > $combiner = new TurkishSuffixCombiner();
-      echo $combiner->kelime('kod')->aitlikEki('m')->halEki('de')->ki()->dahi()->get(); // kodumdaki de
+      echo $combiner->kelime('kod')->aitlikEki('m')->halEki('de')->ki()->aitlikEki('in')->dahi()->get(); // kodumdakinin de
+    > echo $combiner->kelime('kod')->m_aitlik()->de_hal()->ki()->in_aitlik()->dahi()->get(); // kodumdakinin de
+    
 */
 
 class TurkishSuffixCombiner
@@ -126,13 +131,14 @@ class TurkishSuffixCombiner
         $this->set_birlesim($ek);
 
         return $this;
-    }
+    }    
 
     // ÇOĞUL EKİ: ler
     private $cogulEki_ler = array('ler','lar');
 
-    public function cogulEki($ek='ler')
+    public function cogulEki()
     {
+        $ek = 'ler';
         if(in_array($ek,$this->cogulEki_ler)) $ek = $this->cogulEki_ler[$this->ekIndex];
         $this->set_birlesim($ek);
         return $this;
@@ -265,6 +271,22 @@ class TurkishSuffixCombiner
         $this->set_birlesim(array('de','da')[$this->ekIndex]);
         return $this;
     }
+
+    // KULLANIM KOLAYLAŞTIRICI FONKSİYONLAR
+    public function e_hal() { $this->halEki('e'); return $this; }
+    public function i_hal() { $this->halEki('i'); return $this; }
+    public function de_hal() { $this->halEki('de'); return $this; }
+    public function den_hal() { $this->halEki('den'); return $this; }
+    public function ler_cogul() { $this->cogulEki(); return $this; }
+    public function m_aitlik() { $this->aitlikEki('m'); return $this; }
+    public function n_aitlik() { $this->aitlikEki('n'); return $this; }
+    public function im_aitlik() { $this->aitlikEki('im'); return $this; }
+    public function in_aitlik() { $this->aitlikEki('in'); return $this; }
+    public function miz_aitlik() { $this->aitlikEki('miz'); return $this; }
+    public function niz_aitlik() { $this->aitlikEki('niz'); return $this; }
+    public function imiz_aitlik() { $this->aitlikEki('miz'); return $this; }
+    public function iniz_aitlik() { $this->aitlikEki('niz'); return $this; }
+    public function leri_aitlik() { $this->aitlikEki('leri'); return $this; }
 
 
     private function set_birlesim($ek='')
