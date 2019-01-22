@@ -1,7 +1,7 @@
 <?php
 
 $combiner = new TurkishSuffixCombiner();
-echo $combiner->kelime('Emre',true)->aitlikEki('nız')->get(); echo '<br />';
+echo $combiner->kelime('Emre',true)->aitlikEki('in')->get(); echo '<br />';
 echo $combiner->kelime('Murat',true)->aitlikEki('nız')->get(); echo '<br />';
 echo $combiner->kelime('Ümit',true)->aitlikEki('nız')->get(); echo '<br />';
 echo $combiner->kelime('Ekrem',true)->aitlikEki('nız')->get(); echo '<br />';
@@ -18,7 +18,8 @@ echo $combiner->kelime('Tuzluk',false)->halEki('den')->get(); echo '<br />';
 echo $combiner->kelime('Su',false)->halEki('e')->get(); echo '<br />';
 echo $combiner->kelime('Su',false)->halEki('i')->get(); echo '<br />';
 echo $combiner->kelime('Su',false)->halEki('de')->get(); echo '<br />';
-echo $combiner->kelime('Su',false)->halEki('den')->get(); echo '<br />';
+echo $combiner->kelime('Su',false)->halEki('den')->get(); echo '<hr />';
+echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->get(); echo '<br />';
 
 /*
     halEki() fonksiyonu yalnızca şu değerleri alabilir:
@@ -34,6 +35,12 @@ echo $combiner->kelime('Su',false)->halEki('den')->get(); echo '<br />';
     > bizim anlamı için.....: miz, mız, müz, muz, imiz, ımız, ümüz, umuz (kodumuz)
     > sizin anlamı için.....: niz, nız, nüz, nuz, iniz, ınız, ünüz, unuz (kodunuz)
     > onların anlamı için...: leri, ları (kodları)
+
+    ki() fonksiyonu parametre almaz. Kelimeye bitişik -ki eki ekler.
+
+    Fonksiyonlar zincir şeklinde kullanılabilir. Sonuç almak için get() fonksiyonu kullanılır.
+    > $combiner = new TurkishSuffixCombiner();
+      echo $combiner->kelime('kod')->aitlikEki('m')->halEki('de')->get(); // kodumdaki
 */
 
 class TurkishSuffixCombiner
@@ -62,7 +69,7 @@ class TurkishSuffixCombiner
 
     public function get() { return $this->birlesim; }    
 
-    public function kelime($kelime,$ozelAd)
+    public function kelime($kelime,$ozelAd=false)
     {
         $this->k = $kelime;
         $this->kArr = str_split($kelime);
@@ -235,6 +242,13 @@ class TurkishSuffixCombiner
         }
 
         $this->set_birlesim($ek);
+        return $this;
+    }
+
+    // -ki EKİ
+    public function ki()
+    {
+        $this->set_birlesim('ki');
         return $this;
     }
 
