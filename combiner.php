@@ -1,9 +1,9 @@
 <?php
 
 $combiner = new TurkishSuffixCombiner();
-echo $combiner->kelime('Emre',true)->halEki('e')->get();
+echo $combiner->kelime('Emre',true)->cogulEki()->halEki('e')->get();
 echo '<br />';
-echo $combiner->kelime('Murat',true)->halEki('e')->get();
+echo $combiner->kelime('Murat',true)->cogulEki()->halEki('e')->get();
 echo '<br />';
 echo $combiner->kelime('Emre',true)->halEki('i')->get();
 echo '<br />';
@@ -41,10 +41,7 @@ class TurkishSuffixCombiner
     private $sertlesecekSessiz = array('c','d','g');
     private $sertlesmisSessiz = array('ç','t','k');
 
-    private $halEki_e = array('e','a');
-    private $halEki_i = array('i','ı');
-    private $halEki_de = array('de','da','te','ta');
-    private $halEki_den = array('den','dan','ten','tan');
+    
 
     public function __construct($kelime='',$ozelAd=false)
     {
@@ -52,6 +49,15 @@ class TurkishSuffixCombiner
     }
 
     public function get() { return $this->birlesim; }
+
+    private function set_birlesim($ek='')
+    {
+        if($this->ozelAd===true) $this->birlesim = $this->k."'".$ek;
+        else $this->birlesim = $this->k.$ek;
+
+        $this->ozelAd = false;
+        $this->kelime($this->birlesim,false);
+    }
 
     public function kelime($kelime,$ozelAd)
     {
@@ -75,7 +81,12 @@ class TurkishSuffixCombiner
         return $this;
     }
 
-    // e, i, de, den
+    // HAL EKİ: e, i, de, den
+    private $halEki_e = array('e','a');
+    private $halEki_i = array('i','ı');
+    private $halEki_de = array('de','da','te','ta');
+    private $halEki_den = array('den','dan','ten','tan');
+
     public function halEki($ek)
     {        
         if(in_array($ek,$this->halEki_e)) {
@@ -95,22 +106,21 @@ class TurkishSuffixCombiner
             else $ek = $this->halEki_den[$this->ekIndex];
         }
 
-        if($this->ozelAd===true) $this->birlesim = $this->k."'".$ek;
-        else $this->birlesim = $this->k.$ek;
-
-        $this->kelime($this->birlesim,false);
+        $this->set_birlesim($ek);
 
         return $this;
     }
 
+    // ÇOĞUL EKİ: ler
+    private $cogulEki_ler = array('ler','lar');
 
-
+    public function cogulEki($ek='ler')
+    {
+        if(in_array($ek,$this->cogulEki_ler)) $ek = $this->cogulEki_ler[$this->ekIndex];
+        $this->set_birlesim($ek);
+        return $this;
+    }
 
     
 
-    
-
-    
-    
-    
 }
