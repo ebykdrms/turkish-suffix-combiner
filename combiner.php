@@ -19,7 +19,8 @@ echo $combiner->kelime('Su',false)->halEki('e')->get(); echo '<br />';
 echo $combiner->kelime('Su',false)->halEki('i')->get(); echo '<br />';
 echo $combiner->kelime('Su',false)->halEki('de')->get(); echo '<br />';
 echo $combiner->kelime('Su',false)->halEki('den')->get(); echo '<hr />';
-echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->get(); echo '<br />';
+echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->dahi()->get(); echo '<br />';
+echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->aitlikEki('in')->dahi()->get(); echo '<br />';
 
 /*
     halEki() fonksiyonu yalnızca şu değerleri alabilir:
@@ -38,9 +39,12 @@ echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->get(); ech
 
     ki() fonksiyonu parametre almaz. Kelimeye bitişik -ki eki ekler.
 
-    Fonksiyonlar zincir şeklinde kullanılabilir. Sonuç almak için get() fonksiyonu kullanılır.
+    dahi() fonksiyonu parametre almaz. Kelimeye dahi anlamındaki -de ekini (ayrı olarak) ekler.
+
+    Fonksiyonlar zincir şeklinde kullanılabilir. Sıralama önemlidir: Ekler, zincirdeki sırasına göre eklenir.
+    Sonuç almak için get() fonksiyonu kullanılır.
     > $combiner = new TurkishSuffixCombiner();
-      echo $combiner->kelime('kod')->aitlikEki('m')->halEki('de')-ki()->get(); // kodumdaki
+      echo $combiner->kelime('kod')->aitlikEki('m')->halEki('de')->ki()->dahi()->get(); // kodumdaki de
 */
 
 class TurkishSuffixCombiner
@@ -249,6 +253,16 @@ class TurkishSuffixCombiner
     public function ki()
     {
         $this->set_birlesim('ki');
+        return $this;
+    }
+
+    // DAHİ ANLAMINDAKİ -de EKİ
+    public function dahi()
+    {        
+        $this->k = rtrim($this->k).' ';
+        $this->kArr = str_split($this->k);
+        $this->kArrCount = count($this->kArr);
+        $this->set_birlesim(array('de','da')[$this->ekIndex]);
         return $this;
     }
 
