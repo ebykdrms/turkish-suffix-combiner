@@ -40,7 +40,7 @@ echo $combiner->kelime('Tuzluk')->aitlikEki('m')->halEki('da')->ki()->get(); ech
 
     Fonksiyonlar zincir şeklinde kullanılabilir. Sonuç almak için get() fonksiyonu kullanılır.
     > $combiner = new TurkishSuffixCombiner();
-      echo $combiner->kelime('kod')->aitlikEki('m')->halEki('de')->get(); // kodumdaki
+      echo $combiner->kelime('kod')->aitlikEki('m')->halEki('de')-ki()->get(); // kodumdaki
 */
 
 class TurkishSuffixCombiner
