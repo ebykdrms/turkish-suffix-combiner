@@ -41,11 +41,11 @@ ki() fonksiyonu parametre almaz. Kelimeye bitişik -ki eki ekler.
 
 dahi() fonksiyonu parametre almaz. Kelimeye dahi anlamındaki -de ekini (ayrı olarak) ekler.
 
-Fonksiyonlar zincir şeklinde kullanılabilir. Sıralama önemlidir: Ekler, zincirdeki sırasına göre eklenir.
-Sonuç almak için get() fonksiyonu kullanılır.
-$combiner = new TurkishSuffixCombiner();
-echo $combiner->kelime('kod')->aitlikEki('m')->halEki('de')->ki()->aitlikEki('in')->dahi()->get(); // kodumdakinin de
-echo $combiner->kelime('kod')->m_aitlik()->de_hal()->ki()->in_aitlik()->dahi()->get(); // kodumdakinin de
+Fonksiyonlar zincir şeklinde kullanılabilir. Sıralama önemlidir: Ekler, zincirdeki sırasına göre eklenir.<br />
+Sonuç almak için get() fonksiyonu kullanılır.<br />
+$combiner = new TurkishSuffixCombiner();<br />
+echo $combiner->kelime('kod')->aitlikEki('m')->halEki('de')->ki()->aitlikEki('in')->dahi()->get(); // kodumdakinin de<br />
+echo $combiner->kelime('kod')->m_aitlik()->de_hal()->ki()->in_aitlik()->dahi()->get(); // kodumdakinin de<br />
     
 Eklerin büyük harf olarak oluşmasını istiyorsanız iki yol var:
 > Büyük harf olmasını istediğiniz ekin fonkisyonuna son parametre olarak true ekleyin.<br />
